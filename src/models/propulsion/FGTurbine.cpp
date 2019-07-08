@@ -592,6 +592,8 @@ void FGTurbine::bindmodel(FGPropertyManager* PropertyManager)
   property_name = base_property_name + "/InjN2increment";
   PropertyManager->Tie( property_name.c_str(), (FGTurbine*)this,
                         &FGTurbine::GetInjN2increment, &FGTurbine::SetInjN2increment);
+  property_nname = base_property_name + "/EGT";
+  PropertyManager->Tie( property_name.c_str(), &EGT_degC);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
