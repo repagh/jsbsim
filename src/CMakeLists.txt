@@ -59,8 +59,10 @@ add_subdirectory(input_output)
 add_subdirectory(math)
 add_subdirectory(models)
 if (SIMGEAR_FOUND)
-  include_directories(${SIMGEAR_INCLUDE_DIRS})
-  set(JSBSIM_LINK_LIBRARIES ${SIMGEAR_LIBRARIES} ${JSBSIM_LINK_LIBRARIES})
+  find_package(ZLIB)
+  include_directories(${SIMGEAR_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+  set(JSBSIM_LINK_LIBRARIES ${SIMGEAR_LIBRARIES}
+    ${ZLIB_LIBRARIES} ${JSBSIM_LINK_LIBRARIES})
 else()
   add_subdirectory(simgear)
   set(SGTARGET
@@ -69,8 +71,8 @@ else()
     $<TARGET_OBJECTS:Xml>
     $<TARGET_OBJECTS:Magvar>
     $<TARGET_OBJECTS:Misc>
-    $<TARGET_OBJECTS:IOStreams>
     $<TARGET_OBJECTS:Structure>
+    $<TARGET_OBJECTS:IOStreams>
     )
 endif()
 
