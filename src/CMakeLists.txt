@@ -60,9 +60,10 @@ add_subdirectory(math)
 add_subdirectory(models)
 if (SIMGEAR_FOUND)
   find_package(ZLIB)
+  find_package(Threads)
   include_directories(${SIMGEAR_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
   set(JSBSIM_LINK_LIBRARIES ${SIMGEAR_LIBRARIES}
-    ${ZLIB_LIBRARIES} ${JSBSIM_LINK_LIBRARIES})
+    ${ZLIB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${JSBSIM_LINK_LIBRARIES})
 else()
   add_subdirectory(simgear)
   set(SGTARGET
