@@ -58,7 +58,21 @@ add_subdirectory(initialization)
 add_subdirectory(input_output)
 add_subdirectory(math)
 add_subdirectory(models)
-add_subdirectory(simgear)
+if (SIMGEAR_FOUND)
+  include_directories(${SIMGEAR_INCLUDE_DIRS})
+  set(JSBSIM_LINK_LIBRARIES ${SIMGEAR_LIBRARIES} ${JSBSIM_LINK_LIBRARIES})
+else()
+  add_subdirectory(simgear)
+  set(SGTARGET
+    $<TARGET_OBJECTS:Simgear>
+    $<TARGET_OBJECTS:Properties>
+    $<TARGET_OBJECTS:Xml>
+    $<TARGET_OBJECTS:Magvar>
+    $<TARGET_OBJECTS:Misc>
+    $<TARGET_OBJECTS:IOStreams>
+    $<TARGET_OBJECTS:Structure>
+    )
+endif()
 
 if(EXPAT_FOUND)
   include_directories(${EXPAT_INCLUDE_DIRS})
@@ -78,13 +92,7 @@ add_library(libJSBSim ${HEADERS} ${SOURCES}
   $<TARGET_OBJECTS:Models>
   $<TARGET_OBJECTS:Math>
   $<TARGET_OBJECTS:InputOutput>
-  $<TARGET_OBJECTS:Properties>
-  $<TARGET_OBJECTS:Xml>
-  $<TARGET_OBJECTS:Magvar>
-  $<TARGET_OBJECTS:Misc>
-  $<TARGET_OBJECTS:IOStreams>
-  $<TARGET_OBJECTS:Structure>
-  $<TARGET_OBJECTS:Simgear>
+  ${SGTARGET}
   )
 
 set_target_properties (libJSBSim PROPERTIES
