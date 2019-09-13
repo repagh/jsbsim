@@ -183,16 +183,7 @@ FGTable::FGTable(FGPropertyManager* propMan, Element* el,
         }
       }
       // The property string passed into GetNode() must have no spaces or tabs.
-      
-      // RvP, 190819, modifying to try and run the 737-800YV boeing?
-      if (PropertyManager->HasNode(property_string)) {
-	node = PropertyManager->GetNode(property_string);
-      }
-      else {
-	cerr << fgcyan << "Warning the independentVar \"" << property_string
-	     << " is initially undefined." << reset << endl;
-	node = PropertyManager->GetNode(property_string, true);
-      }
+      node = PropertyManager->GetNode(property_string);
 	
       if (node == 0) {
         cerr << axisElement->ReadFrom();
