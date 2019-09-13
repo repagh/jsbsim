@@ -53,44 +53,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(src)
 
 ################################################################################
-# Build the automated test infrastructure (needs Python and Cython)            #
-################################################################################
-
-option(BUILD_PYTHON_MODULE "Set to ON to build the Python module for JSBSim" ON)
-option(INSTALL_PYTHON_MODULE "Set to ON to install the Python module for JSBSim" OFF)
-
-if (BUILD_PYTHON_MODULE)
-  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/python/CMakeModules)
-  find_package(Cython)
-
-  if (CYTHON_FOUND)
-    find_package(PythonLibs)
-    if (PYTHONLIBS_FOUND)
-      include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
-      enable_testing()
-      add_subdirectory(tests)
-      add_subdirectory(python)
-    endif(PYTHONLIBS_FOUND)
-  endif(CYTHON_FOUND)
-
-  if (NOT (CYTHON_FOUND AND PYTHONLIBS_FOUND))
-    message(WARNING "JSBSim Python module and test suite will not be built")
-  endif()
-endif(BUILD_PYTHON_MODULE)
-
-################################################################################
-# Build the unit tests (needs CxxTest)                                         #
-################################################################################
-
-find_package(CxxTest)
-
-if (CXXTEST_FOUND)
-  include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
-  enable_testing()
-  add_subdirectory(tests/unit_tests)
-endif(CXXTEST_FOUND)
-
-################################################################################
 # Documentation                                                                #
 ################################################################################
 
@@ -104,6 +66,61 @@ if(DOXYGEN_FOUND)
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif()
+
+################################################################################
+# Build the Python module and the automated test infrastructure (needs Python  #
+# and Cython)                                                                  #
+################################################################################
+
+option(BUILD_PYTHON_MODULE "Set to ON to build the Python module for JSBSim" ON)
+option(INSTALL_PYTHON_MODULE "Set to ON to install the Python module for JSBSim" OFF)
+
+if (BUILD_PYTHON_MODULE)
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/python/CMakeModules)
+  find_package(Cython)
+
+  if (CYTHON_FOUND)
+    find_package(PythonLibs)
+    if (PYTHONLIBS_FOUND)
+      include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
+      configure_file(python/jsbsim.pyx ${CMAKE_CURRENT_BINARY_DIR}/python/jsbsim.pyx)
+      # Autogenerate the Python module doc strings from Doxygen docs
+      if(DOXYGEN_FOUND)
+        configure_file(${CMAKE_CURRENT_LIST_DIR}/python/Doxy2PyDocStrings.py
+          python/doxy2pydocs.py)
+        if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/documentation/xml)
+          execute_process(COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+        endif()
+        execute_process(COMMAND ${PYTHON_EXECUTABLE} doxy2pydocs.py
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python)
+
+        # Prepare the sphinx build files
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/python/sphinx/conf.py.in
+          ${CMAKE_CURRENT_BINARY_DIR}/documentation/conf.py)
+        file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/doc/python/sphinx/index.rst
+          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/documentation)
+      endif(DOXYGEN_FOUND)
+      enable_testing()
+      add_subdirectory(tests)
+      add_subdirectory(python)
+    endif(PYTHONLIBS_FOUND)
+  elseif(NOT PYTHONLIBS_FOUND)
+    message(WARNING "JSBSim Python module and test suite will not be built")
+  endif(CYTHON_FOUND)
+endif(BUILD_PYTHON_MODULE)
+
+################################################################################
+# Build the unit tests (needs CxxTest)                                         #
+################################################################################
+
+find_package(CxxTest)
+
+if (CXXTEST_FOUND)
+  include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
+  enable_testing()
+  add_subdirectory(tests/unit_tests)
+endif(CXXTEST_FOUND)
 
 ################################################################################
 # Packaging                                                                    #
