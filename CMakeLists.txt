@@ -23,6 +23,7 @@ endif()
 option(SYSTEM_SIMGEAR "Set to ON to build JSBSim using the system simgear" OFF)
 if (SYSTEM_SIMGEAR)
   find_path(SIMGEAR_INCLUDE_DIRS simgear/version.h)
+  include_directories(${SIMGEAR_INCLUDE_DIRS})
   find_library(SIMGEAR_LIBRARYC SimGearCore)
   find_library(SIMGEAR_LIBRARYS SimGearScene)
   
