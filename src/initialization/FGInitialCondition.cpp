@@ -92,7 +92,7 @@ void FGInitialCondition::ResetIC(double u0, double v0, double w0,
 
   InitializeIC();
 
-  vPQR_body = FGColumnVector3(p0, q0, r0);
+  vPQR_body = {p0, q0, r0};
   alpha = alpha0;  beta = beta0;
 
   position.SetLongitude(lonRad0);
@@ -108,9 +108,9 @@ void FGInitialCondition::ResetIC(double u0, double v0, double w0,
   vt = vUVW_NED.Magnitude();
   lastSpeedSet = setuvw;
 
-  Tw2b = FGMatrix33(calpha*cbeta, -calpha*sbeta,  -salpha,
-                           sbeta,         cbeta,      0.0,
-                    salpha*cbeta, -salpha*sbeta,   calpha);
+  Tw2b = { calpha*cbeta, -calpha*sbeta,  -salpha,
+                  sbeta,         cbeta,      0.0,
+           salpha*cbeta, -salpha*sbeta,   calpha };
   Tb2w = Tw2b.Transposed();
 
   SetFlightPathAngleRadIC(gamma0);
@@ -138,8 +138,8 @@ void FGInitialCondition::InitializeIC(void)
 
   targetNlfIC = 1.0;
 
-  Tw2b.InitMatrix(1., 0., 0., 0., 1., 0., 0., 0., 1.);
-  Tb2w.InitMatrix(1., 0., 0., 0., 1., 0., 0., 0., 1.);
+  Tw2b = { 1., 0., 0., 0., 1., 0., 0., 0., 1. };
+  Tb2w = { 1., 0., 0., 0., 1., 0., 0., 0., 1. };
 
   lastSpeedSet = setvt;
   lastAltitudeSet = setasl;
@@ -223,9 +223,9 @@ void FGInitialCondition::calcAeroAngles(const FGColumnVector3& _vt_NED)
     sbeta = va / vt;
   }
 
-  Tw2b = FGMatrix33(calpha*cbeta, -calpha*sbeta,  -salpha,
-                           sbeta,         cbeta,      0.0,
-                    salpha*cbeta, -salpha*sbeta,   calpha);
+  Tw2b = { calpha*cbeta, -calpha*sbeta,  -salpha,
+                  sbeta,         cbeta,      0.0,
+           salpha*cbeta, -salpha*sbeta,   calpha };
   Tb2w = Tw2b.Transposed();
 }
 
@@ -340,7 +340,7 @@ void FGInitialCondition::calcThetaBeta(double alfa, const FGColumnVector3& _vt_N
 
   FGColumnVector3 v0 = Tpsi * _vt_NED;
   FGColumnVector3 n = (Talpha * Tphi).Transposed() * FGColumnVector3(0., 0., 1.);
-  FGColumnVector3 y = FGColumnVector3(0., 1., 0.);
+  FGColumnVector3 y = {0., 1., 0.};
   FGColumnVector3 u = y - DotProduct(y, n) * n;
   FGColumnVector3 p = y * n;
 
@@ -383,9 +383,9 @@ void FGInitialCondition::calcThetaBeta(double alfa, const FGColumnVector3& _vt_N
     cbeta = v2(eU) / vt;
     sbeta = v2(eV) / vt;
   }
-  Tw2b = FGMatrix33(calpha*cbeta, -calpha*sbeta,  -salpha,
-                           sbeta,         cbeta,      0.0,
-                    salpha*cbeta, -salpha*sbeta,   calpha);
+  Tw2b = { calpha*cbeta, -calpha*sbeta,  -salpha,
+                  sbeta,         cbeta,      0.0,
+           salpha*cbeta, -salpha*sbeta,   calpha };
   Tb2w = Tw2b.Transposed();
 }
 
@@ -409,9 +409,9 @@ void FGInitialCondition::SetBetaRadIC(double bta)
                      0., cphi,-sphi,
                      0., sphi, cphi);
 
-  Tw2b = FGMatrix33(calpha*cbeta, -calpha*sbeta,  -salpha,
-                           sbeta,         cbeta,      0.0,
-                    salpha*cbeta, -salpha*sbeta,   calpha);
+  Tw2b = { calpha*cbeta, -calpha*sbeta,  -salpha,
+                  sbeta,         cbeta,      0.0,
+           salpha*cbeta, -salpha*sbeta,   calpha };
   Tb2w = Tw2b.Transposed();
 
   FGColumnVector3 vf = TphiInv * Tw2b * FGColumnVector3(vt, 0., 0.);
@@ -603,7 +603,7 @@ void FGInitialCondition::SetWindMagKtsIC(double mag)
   if (windMag > 0.001)
     _vHEAD *= (mag*ktstofps) / windMag;
   else
-    _vHEAD = FGColumnVector3((mag*ktstofps), 0., 0.);
+    _vHEAD = {mag*ktstofps, 0., 0.};
 
   _vWIND_NED(eU) = _vHEAD(eU);
   _vWIND_NED(eV) = _vHEAD(eV);
@@ -1066,10 +1066,9 @@ bool FGInitialCondition::Load_v1(Element* document)
   // This is the rotation rate of the "Local" frame, expressed in the local frame.
   const FGMatrix33& Tl2b = orientation.GetT();
   double radInv = 1.0 / position.GetRadius();
-  FGColumnVector3 vOmegaLocal = FGColumnVector3(
-                                                radInv*vUVW_NED(eEast),
-                                                -radInv*vUVW_NED(eNorth),
-                                                -radInv*vUVW_NED(eEast)*position.GetTanLatitude() );
+  FGColumnVector3 vOmegaLocal = {radInv*vUVW_NED(eEast),
+                                 -radInv*vUVW_NED(eNorth),
+                                 -radInv*vUVW_NED(eEast)*position.GetTanLatitude()};
 
   vPQR_body = Tl2b * vOmegaLocal;
 
@@ -1238,7 +1237,7 @@ bool FGInitialCondition::Load_v2(Element* document)
   // The vehicle will be defaulted to (0,0,0) in the Body frame if nothing is provided.
 
   Element* velocity_el = document->FindElement("velocity");
-  FGColumnVector3 vInitVelocity = FGColumnVector3(0.0, 0.0, 0.0);
+  FGColumnVector3 vInitVelocity(0.0, 0.0, 0.0);
   FGMatrix33 mTec2l = position.GetTec2l();
   const FGMatrix33& Tb2l = orientation.GetTInv();
 
@@ -1291,10 +1290,9 @@ bool FGInitialCondition::Load_v2(Element* document)
   // Refer to Stevens and Lewis, 1.5-14a, pg. 49.
   // This is the rotation rate of the "Local" frame, expressed in the local frame.
   double radInv = 1.0 / position.GetRadius();
-  FGColumnVector3 vOmegaLocal = FGColumnVector3(
-   radInv*vUVW_NED(eEast),
-  -radInv*vUVW_NED(eNorth),
-  -radInv*vUVW_NED(eEast)*position.GetTanLatitude() );
+  FGColumnVector3 vOmegaLocal = { radInv*vUVW_NED(eEast),
+                                  -radInv*vUVW_NED(eNorth),
+                                  -radInv*vUVW_NED(eEast)*position.GetTanLatitude()};
 
   if (attrate_el) {
 

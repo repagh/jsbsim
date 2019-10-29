@@ -85,9 +85,9 @@ FGLocation::FGLocation(double lon, double lat, double radius)
   double cosLat = cos(lat);
   double sinLon = sin(lon);
   double cosLon = cos(lon);
-  mECLoc = FGColumnVector3( radius*cosLat*cosLon,
-                            radius*cosLat*sinLon,
-                            radius*sinLat );
+  mECLoc = { radius*cosLat*cosLon,
+             radius*cosLat*sinLon,
+             radius*sinLat };
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -232,9 +232,9 @@ void FGLocation::SetPosition(double lon, double lat, double radius)
   double sinLon = sin(lon);
   double cosLon = cos(lon);
 
-  mECLoc = FGColumnVector3( radius*cosLat*cosLon,
-                            radius*cosLat*sinLon,
-                            radius*sinLat );
+  mECLoc = { radius*cosLat*cosLon,
+             radius*cosLat*sinLon,
+             radius*sinLat };
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -314,9 +314,9 @@ void FGLocation::ComputeDerivedUnconditional(void) const
   // orientation of the navigation (local) frame relative to the ECEF frame,
   // and a transformation from ECEF to nav (local) frame.
 
-  mTec2l = FGMatrix33( -cosLon*sinLat, -sinLon*sinLat,  cosLat,
-                           -sinLon   ,     cosLon    ,    0.0 ,
-                       -cosLon*cosLat, -sinLon*cosLat, -sinLat  );
+  mTec2l = { -cosLon*sinLat, -sinLon*sinLat,  cosLat,
+                 -sinLon   ,     cosLon    ,    0.0 ,
+             -cosLon*cosLat, -sinLon*cosLat, -sinLat  };
 
   // In Stevens and Lewis notation, this is C_e/n - the
   // orientation of the ECEF frame relative to the nav (local) frame,
@@ -324,8 +324,8 @@ void FGLocation::ComputeDerivedUnconditional(void) const
 
   mTl2ec = mTec2l.Transposed();
 
-  // Calculate the geodetic latitude based on "Transformation from Cartesian
-  // to geodetic coordinates accelerated by Halley's method", Fukushima T. (2006)
+  // Calculate the geodetic latitude based on "Transformation from Cartesian to
+  // geodetic coordinates accelerated by Halley's method", Fukushima T. (2006)
   // Journal of Geodesy, Vol. 79, pp. 689-693
   // Unlike I. Sofair's method which uses a closed form solution, Fukushima's
   // method is an iterative method whose convergence is so fast that only one
